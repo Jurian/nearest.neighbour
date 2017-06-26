@@ -39,8 +39,9 @@ grid_kknn = list(
   distance = c(1, 2),
   kernel = c("rectangular", "triangular", "epanechnikov", "biweight", "triweight", "cos", "inv", "gaussian", "rank", "optimal"))
 
-res_kkn = RandomSearchR::random_search_resample(dat$TG, tune_iters = 30,
-                                 resampling_method = list(method = 'bootstrap', repeats = 25, sample_rate = 0.65, folds = NULL),
+# Random search has a probability of 95% of finding a combination of parameters within the 5% optima with only 60 iterations.
+res_kkn = RandomSearchR::random_search_resample(dat$TG, tune_iters = 60,
+                                 resampling_method = list(method = 'cross_validation', folds = 5),
                                  ALGORITHM = list(package = require(kknn), algorithm = kknn),
                                  grid_params = grid_kknn,
                                  DATA = list(formula = TG ~ datetime + longitude + latitude, train = dat),
