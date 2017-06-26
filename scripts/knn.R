@@ -1,6 +1,10 @@
 library(kknn)
 library(ggplot2)
 require(reshape2)
+library(KernelKnn)
+library(devtools)
+install_github("mlampros/RandomSearchR")
+source("R/dataPreperation.R")
 
 ggplot.kknn.mse <- function(knn) {
 
@@ -19,38 +23,30 @@ ggplot.kknn.mse <- function(knn) {
 
 }
 
-source("R/dataPreperation.R")
-
 dat <- combine.weather.datasets(
   station.file = "data/stations.csv",
   weather.files = c("data/weather.csv"),
   columns = c("datetime", "longitude", "latitude", "RH", "TG"))
 
-knn.tg <- list()
-knn.tg$rectangular  <- train.kknn(TG ~ datetime + longitude + latitude, data = dat, kernel = "rectangular")
-knn.tg$triangular   <- train.kknn(TG ~ datetime + longitude + latitude, data = dat, kernel = "triangular")
-knn.tg$epanechnikov <- train.kknn(TG ~ datetime + longitude + latitude, data = dat, kernel = "epanechnikov")
-knn.tg$biweight     <- train.kknn(TG ~ datetime + longitude + latitude, data = dat, kernel = "biweight")
-knn.tg$triweight    <- train.kknn(TG ~ datetime + longitude + latitude, data = dat, kernel = "triweight")
-knn.tg$cos          <- train.kknn(TG ~ datetime + longitude + latitude, data = dat, kernel = "cos")
-knn.tg$inv          <- train.kknn(TG ~ datetime + longitude + latitude, data = dat, kernel = "inv")
-knn.tg$gaussian     <- train.kknn(TG ~ datetime + longitude + latitude, data = dat, kernel = "gaussian")
-knn.tg$optimal      <- train.kknn(TG ~ datetime + longitude + latitude, data = dat, kernel = "optimal")
+# Fix rain < 0.1mm
+dat$RH[dat$RH < 0] <- 0
 
-ggplot.kknn.mse(knn.tg)
+# A randomized search simply samples parameter settings a fixed number of times from a specified subset of the hyperparameter space of a learning algorithm.
+# This method has been found to be more effective in high-dimensional spaces than an exhaustive search (grid-search).
 
-knn.rh <- list()
-knn.rh$rectangular  <- train.kknn(RH ~ datetime + longitude + latitude, data = dat, kernel = "rectangular")
-knn.rh$triangular   <- train.kknn(RH ~ datetime + longitude + latitude, data = dat, kernel = "triangular")
-knn.rh$epanechnikov <- train.kknn(RH ~ datetime + longitude + latitude, data = dat, kernel = "epanechnikov")
-knn.rh$biweight     <- train.kknn(RH ~ datetime + longitude + latitude, data = dat, kernel = "biweight")
-knn.rh$triweight    <- train.kknn(RH ~ datetime + longitude + latitude, data = dat, kernel = "triweight")
-knn.rh$cos          <- train.kknn(RH ~ datetime + longitude + latitude, data = dat, kernel = "cos")
-knn.rh$inv          <- train.kknn(RH ~ datetime + longitude + latitude, data = dat, kernel = "inv")
-knn.rh$gaussian     <- train.kknn(RH ~ datetime + longitude + latitude, data = dat, kernel = "gaussian")
-knn.rh$optimal      <- train.kknn(RH ~ datetime + longitude + latitude, data = dat, kernel = "optimal")
+grid_kknn = list(
+  k = 3:20,
+  distance = c(1, 2),
+  kernel = c("rectangular", "triangular", "epanechnikov", "biweight", "triweight", "cos", "inv", "gaussian", "rank", "optimal"))
 
-ggplot.kknn.mse(knn.rh)
+res_kkn = RandomSearchR::random_search_resample(dat$TG, tune_iters = 30,
+                                 resampling_method = list(method = 'bootstrap', repeats = 25, sample_rate = 0.65, folds = NULL),
+                                 ALGORITHM = list(package = require(kknn), algorithm = kknn),
+                                 grid_params = grid_kknn,
+                                 DATA = list(formula = TG ~ datetime + longitude + latitude, train = dat),
+                                 Args = NULL,
+                                 regression = T, re_run_params = F)
+
 
 
 
