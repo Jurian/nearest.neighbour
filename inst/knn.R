@@ -4,6 +4,7 @@ require(reshape2)
 library(KernelKnn)
 library(devtools)
 install_github("mlampros/RandomSearchR")
+library(RandomSearchR)
 source("R/dataPreperation.R")
 
 ggplot.kknn.mse <- function(knn) {
@@ -24,8 +25,8 @@ ggplot.kknn.mse <- function(knn) {
 }
 
 dat <- combine.weather.datasets(
-  station.file = "data/stations.csv",
-  weather.files = c("data/weather.csv"),
+  station.file = "inst/extdata/stations.csv",
+  weather.files = c("inst/extdata/weather.csv"),
   columns = c("datetime", "longitude", "latitude",  "TG"))
 
 # Fix rain < 0.1mm
@@ -41,7 +42,7 @@ dat <- dat[sample(1:nrow(dat), 100000)]
 # This method has been found to be more effective in high-dimensional spaces than an exhaustive search (grid-search).
 
 grid_kknn = list(
-  k = 1:8,
+  k = 1:3,
   distance = c(1, 2),
   kernel = c("rectangular", "triangular", "epanechnikov", "biweight", "triweight", "cos", "inv", "gaussian", "rank", "optimal"))
 
