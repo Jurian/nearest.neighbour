@@ -4,7 +4,8 @@
 \alias{combine.weather.datasets}
 \title{Combine multiple weather data sets with station information}
 \usage{
-combine.weather.datasets(station.file, weather.files, columns, tz = "UTC")
+combine.weather.datasets(station.file, weather.files, columns, tz = "UTC",
+  tf = "\%Y\%m\%d")
 }
 \arguments{
 \item{station.file}{Path to file with station information, e.g. "data/stations.csv"}
@@ -14,16 +15,16 @@ combine.weather.datasets(station.file, weather.files, columns, tz = "UTC")
 \item{columns}{Which columns to take from the merged result, e.g. c("longitude", "latitude", "datetime", "precipitation",  "temperature")}
 
 \item{tz}{Optional timezone setting, defaults to "UTC"}
+
+\item{tf}{Optional timeformat setting, defaults to "\%Y\%m\%d}
 }
 \value{
 A datatable created by merging supplied data sets with each other and the station data. Datetime information is converted to unix timestamp
 }
 \description{
-This function makes several assumptions about the structure of supplied datasets. Weather data is assumed to be of the form <station, datetime, value>. Station data is assumed to be minimally of the form <station, longitude, latitude>. This function was specifially designed to merge data taken from http://www.sciamachy-validation.org/climatology/daily_data/selection.cgi
-}
-\seealso{
-http://www.sciamachy-validation.org/climatology/daily_data/selection.cgi
+This function makes several assumptions about the structure of supplied datasets. Weather data is assumed to be of the form <station, datetime, value>.
 }
 \author{
 Jurian Baas
 }
+\keyword{\url{http://www.sciamachy-validation.org/climatology/daily_data/selection.cgi}}
