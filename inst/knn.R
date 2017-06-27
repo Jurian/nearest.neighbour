@@ -47,7 +47,7 @@ grid_kknn = list(
 
 # Random search has a probability of 95% of finding a combination of parameters within the 5% optima with only 60 iterations.
 # See accepted answer at: https://stats.stackexchange.com/questions/160479/practical-hyperparameter-optimization-random-vs-grid-search
-# i.e. 1 − (1−0.05)^n > 0.95 = n >= 60
+# i.e. 1 − 0.95^n > 0.95 = n >= 60
 # 60 iterations is 37.5% of an exhaustive search in this case (8 * 2 * 10)
 # 90 iterations (56.25% of an exhaustive search) would get you 99% probability of being in 5% optimum
 res_kknn = RandomSearchR::random_search_resample(dat$TG, tune_iters = 60,
