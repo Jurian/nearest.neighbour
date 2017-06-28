@@ -22,14 +22,13 @@ buildKdTree <- function(X, y, FUN = median, ...) {
     split <- FUN(X[[i]], ...)
     idx.1 <- X[[i]] <= split
     idx.2 <- !idx.1
-    
+
     tree  <- c(tree, list(
       value = split,
-      dim = i
+      dim = i,
+      left = build(X[idx.1], y[idx.1], depth + 1, tree, FUN),
+      right = build(X[idx.2], y[idx.2], depth + 1, tree, FUN)
     ))
-    
-    if(sum(idx.1) > 0) tree$left <- build(X[idx.1], y[idx.1], depth + 1, tree, FUN)
-    if(sum(idx.2) > 0) tree$right <- build(X[idx.2], y[idx.2], depth + 1, tree, FUN)
 
     return(tree)
 
@@ -61,31 +60,32 @@ buildKdTree <- function(X, y, FUN = median, ...) {
 buildKdDataTree <- function(X, y, scale = TRUE, FUN = median, ...) {
 
   if(scale) X <- data.table::data.table(scale(X))
-  
+
   # Nr of dimensions
   d <- ncol(X)
 
   build <- function(X, y, depth, parent, FUN) {
 
     if(nrow(X) == 1) {
-  
+
       leaf <- parent$AddChild(
         paste(y, collapse = ","),
-        value = y
+        value = y,
+        depth = depth
       )
 
     } else {
 
       # Iterate over dimensions
       i <- depth %% d + 1
-      
+
       # compute split
       split <- FUN(X[[i]], ...)
       idx.1 <- X[[i]] <= split
       idx.2 <- !idx.1
-      
+
       node.name <- paste(colnames(X)[i], "=", split)
-      
+
       if(is.null(parent)) {
         node <- data.tree::Node$new (
           node.name,
@@ -99,13 +99,13 @@ buildKdDataTree <- function(X, y, scale = TRUE, FUN = median, ...) {
           dim = i
         )
       }
-      
+
       # Build subtree recursively
       build(X[idx.1], y[idx.1], depth + 1, node, FUN)
       build(X[idx.2], y[idx.2], depth + 1, node, FUN)
-      
+
       if(is.null(parent)) return(node)
-      
+
     }
   }
 
@@ -144,9 +144,9 @@ plot.kd.data.tree <- function(x, ..., plotting.type = "scatter") {
   if(class(kdtree) != "kd.data.tree") stop("Parameter is not of class kd.data.tree")
 
   if(plotting.type == "scatter") {
-    
+
     if(kdtree$dim != 2) stop("Currently only two dimensional trees can be plotted")
-    
+
     graphics::plot(kdtree$X,
                    col= "blue", pch = 19, cex = 1, lty = "solid", lwd = 2)
     graphics::text(kdtree$X,
@@ -154,10 +154,13 @@ plot.kd.data.tree <- function(x, ..., plotting.type = "scatter") {
                    cex = 0.7, pos = 4)
 
     box <- graphics::par("usr")
+    box.x <- box[1:2]
+    box.y <- box[3:4]
 
     kdtree$tree$Do(function(node) {
+
       if(!node$isLeaf) {
-        
+
       }
     })
 
