@@ -145,7 +145,7 @@ plot.kd.data.tree <- function(x, ..., plotting.type = "scatter") {
 
   if(plotting.type == "scatter") {
 
-    if(kdtree$dim != 2) stop("Currently only two dimensional trees can be plotted")
+    if(kdtree$dim != 2) stop("Only two dimensional trees can be plotted this way")
 
     graphics::plot(kdtree$X,
                    col= "blue", pch = 19, cex = 1, lty = "solid", lwd = 2)
@@ -181,7 +181,11 @@ plot.kd.data.tree <- function(x, ..., plotting.type = "scatter") {
 #' @author Jurian Baas
 #' @importFrom graphics plot text lines
 plot.kd.tree <- function(x, ...) {
+
+  # The x, ... arguments are there to conform to the CRAN standard, see also:
+  # https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Generic-functions-and-methods
   kdtree <- x
+
   if(class(kdtree) != "kd.tree") stop("Parameter is not of class kd.tree")
   if(kdtree$dim != 2) stop("Currently only two dimensional trees can be plotted")
 
@@ -228,27 +232,4 @@ traverseKdTree <- function(kdtree, FUN, ...) {
 
   traverse(kdtree$tree)
 
-}
-
-#' @title Build a binary tree
-#' @description Toy example, not used ATM
-#' @param X Data frame to use
-#' @author Jurian Baas
-buildBinaryTree <- function(X) {
-
-  build <- function(X, tree) {
-
-    if(length(X) == 1) return(X)
-
-    idx <- 1:length(X) / 2
-
-    tree$left <- build(X[idx], tree)
-    tree$right <- build(X[-idx], tree)
-
-    return(tree)
-  }
-
-  tree <- build(X, tree = list())
-
-  return(tree)
 }
