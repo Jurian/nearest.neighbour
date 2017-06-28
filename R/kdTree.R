@@ -69,7 +69,8 @@ buildKdDataTree <- function(X, y, FUN = median, ...) {
       leaf <- parent$AddChild(
         paste(y, collapse = ","),
         value = y,
-        side = side
+        side = side,
+        depth = depth
       )
 
     } else {
@@ -85,11 +86,14 @@ buildKdDataTree <- function(X, y, FUN = median, ...) {
           as.character(split),
           split = split,
           dim = i,
-          side = 'root'
+          side = 'root',
+          depth = depth
         )
 
-        build(X[idx.1], y[idx.1], depth + 1, root, 'left', FUN)
-        build(X[idx.2], y[idx.2], depth + 1, root, 'right', FUN)
+        if(sum(idx.1) > 0 & sum(idx.2) > 0) {
+          build(X[idx.1], y[idx.1], depth + 1, root, 'left', FUN)
+          build(X[idx.2], y[idx.2], depth + 1, root, 'right', FUN)
+        }
 
         return(root)
 
@@ -98,11 +102,16 @@ buildKdDataTree <- function(X, y, FUN = median, ...) {
           as.character(split),
           split = split,
           dim = i,
-          side = side
+          side = side,
+          depth = depth
         )
 
-        build(X[idx.1], y[idx.1], depth + 1, child, 'left', FUN)
-        build(X[idx.2], y[idx.2], depth + 1, child, 'right', FUN)
+        if(sum(idx.1) > 0 & sum(idx.2) > 0) {
+          build(X[idx.1], y[idx.1], depth + 1, child, 'left', FUN)
+          build(X[idx.2], y[idx.2], depth + 1, child, 'right', FUN)
+        }
+
+
       }
     }
   }
@@ -142,39 +151,84 @@ plot.kd.data.tree <- function(x, ..., plotting.type = "scatter") {
                    cex = 0.7, pos = 4)
 
     box <- graphics::par("usr")
+    box.x <- box[1:2]
+    box.y <- box[3:4]
 
     kdtree$tree$Do(function(node) {
+
       if(!node$isLeaf) {
+
+        test <- c(
+          "left left right",
+          "left right right",
+          "right right left",
+          "right left left"
+        )
+
+        if(node$depth >= 3) {
+
+          anc <- paste(
+            node$side,
+            node$parent$side,
+            node$parent$parent$side
+          )
+
+          print(
+            anc
+          )
+
+          print(anc %in% test)
+        }
+
+      }
+
+
+
+      if(!node$isLeaf & node$depth < 4) {
 
         # If it's a vertical line
         if(node$dim == 1) {
 
-          r <- range(box[3:4])
-
-          if(node$side == 'left') {
-            r[2] <- node$parent$split
+          if(node$isRoot) {
+            a <- box.y[1]
+            b <- box.y[2]
           } else if(node$side == 'right') {
-            r[1] <- node$parent$split
+            a <- ifelse(is.null(node$parent), box.y[1], node$parent$split)
+            b <- ifelse(is.null(node$parent$parent$parent), box.y[2], node$parent$parent$parent$split)
+          } else if(node$side == 'left') {
+            a <- ifelse(is.null(node$parent), box.y[2], node$parent$split)
+            b <- ifelse(is.null(node$parent$parent$parent), box.y[1], node$parent$parent$parent$split)
           }
+
+          y <- c(a,b)
 
           graphics::lines(
             x = c(node$split, node$split),
-            y = r
+            y = y
           )
+
+          graphics::text(y = mean(y), x = node$split, label = paste(node$depth, node$side))
+
         } else {
 
-          r <- range(box[1:2])
+          if(node$side == 'right') {
+            a <- ifelse(is.null(node$parent), box.x[1], node$parent$split)
+            b <- ifelse(is.null(node$parent$parent$parent), box.x[2], node$parent$parent$parent$split)
+          } else if(node$side == 'left') {
 
-          if(node$side == 'left') {
-            r[2] <- node$parent$split
-          } else if(node$side == 'right') {
-            r[1] <- node$parent$split
+            a <- ifelse(is.null(node$parent), box.x[2], node$parent$split)
+            b <- ifelse(is.null(node$parent$parent$parent), box.x[1], node$parent$parent$parent$split)
           }
+
+          x <- c(a,b)
+
 
           graphics::lines(
             y = c(node$split, node$split),
-            x = r
+            x = x
           )
+
+          graphics::text(x = mean(x), y = node$split, label = paste(node$depth, node$side))
         }
 
       }
