@@ -4,12 +4,14 @@
 \alias{buildKdDataTree}
 \title{Construct a KD-Tree using the data.tree package}
 \usage{
-buildKdDataTree(X, y, FUN = median, ...)
+buildKdDataTree(X, y, scale = TRUE, FUN = median, ...)
 }
 \arguments{
-\item{X}{Data frame of values on which to perform splits}
+\item{X}{Data table of values on which to perform splits}
 
-\item{y}{Vector or data frame with data that should be stored in the leafs}
+\item{y}{Vector with data that should be stored in the leafs}
+
+\item{scale}{Should data be scaled beforehand, defaults to true}
 
 \item{FUN}{Optional function to use for determining position of split. Defaults to median as this gives a balanced tree}
 

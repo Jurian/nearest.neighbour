@@ -9,7 +9,7 @@ buildKdTree(X, y, FUN = median, ...)
 \arguments{
 \item{X}{Data frame of values on which to perform splits}
 
-\item{y}{Vector or data frame with data that should be stored in the leafs}
+\item{y}{Vector with data that should be stored in the leafs}
 
 \item{FUN}{Optional function to use for determining position of split. Defaults to median as this gives a balanced tree}
 
