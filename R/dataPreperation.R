@@ -13,7 +13,8 @@
 #' @keywords  \url{http://www.sciamachy-validation.org/climatology/daily_data/selection.cgi}
 combine.weather.datasets <- function(station.file, weather.files, columns, tz = "UTC", tf = "%Y%m%d") {
 
-  stations <- data.table::fread(station.file)
+  stations <- load(station.file)
+  stations <- data.table::data.table(stations)
   data.table::setkey(stations, "station")
 
   weather <- base::Reduce(function(a, b) merge(a, b, by = c("station", "datetime"), all = T), lapply(weather.files, function(wt) {
